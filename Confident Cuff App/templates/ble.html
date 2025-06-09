@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confident Cuff</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .sos-button {
+            background-color: #dc3545;
+        }
+        .sos-button:hover {
+            background-color: #c82333;
+        }
+        #mapLink {
+            color: #007bff;
+            text-decoration: none;
+        }
+        #mapLink:hover {
+            text-decoration: underline;
+        }
+        #connectButton {
+            display: block;
+        }
+        #connectButton.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Sidebar -->
+    <div style="
+        position: fixed;
+        top: 50%;
+        left: 24px;
+        transform: translateY(-50%);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    ">
+        <div style="width:40px; height:40px; margin-bottom:16px; border-radius:50%; background:#e3e3e3; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.1); cursor:pointer;" onclick="window.location.href='index.html'">
+            <span title="Home">🏠</span>
+        </div>
+        <div style="width:40px; height:40px; margin-bottom:16px; border-radius:50%; background:#e3e3e3; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.1); cursor:pointer;" onclick="window.location.href='profile.html'">
+            <span title="Profile">👤</span>
+        </div>
+        <div style="width:40px; height:40px; margin-bottom:16px; border-radius:50%; background:#e3e3e3; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.1); cursor:pointer;" onclick="window.location.href='add-contact.html'">
+            <span title="Contacts">📞</span>
+        </div>
+        <div style="width:40px; height:40px; margin-bottom:16px; border-radius:50%; background:#ffe066; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.1); cursor:pointer;" onclick="window.location.href='ambulance.html'">
+            <span title="Ambulance">🚑</span>
+        </div>
+        <div style="width:40px; height:40px; margin-bottom:16px; border-radius:50%; background:#ff6b6b; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.1); cursor:pointer;" onclick="window.location.href='police.html'">
+            <span title="SOS">🚨</span>
+        </div>
+    </div>
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Confident Cuff - Live Heart Rate, GPS & SOS</h1>
+        <button id="connectButton">Connect to Confident Cuff</button>
+
+        <div class="section">
+            <h2>Heart Rate</h2>
+            <p id="heartRate">0 BPM</p>
+            <button onclick="calculateBPM()">Calculate BPM</button>
+        </div>
+
+        <div class="section">
+            <h2>Location</h2>
+            <p id="latitude">Lat: N/A</p>
+            <p id="longitude">Lon: N/A</p>
+            <a id="mapLink" href="#" target="_blank">View on Map</a>
+        </div>
+
+        <div class="section">
+            <h2>Date & Time</h2>
+            <p id="dateTime">N/A</p>
+        </div>
+
+        <div class="section">
+            <button onclick="viewHistory()">View History</button>
+        </div>
+
+        <div class="section">
+            <button class="sos-button" onclick="sendSOS()">Send SOS Alert</button>
+        </div>
+
+        <div class="section">
+            <p>Device Name: <span id="deviceName">N/A</span></p>
+            <p>Device ID: <span id="deviceId">N/A</span></p>
+        </div>
+    </div>
+
+    <script>
+        const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+        const PULSE_CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+        const GPS_CHARACTERISTIC_UUID = '6d3f2a1e-5f9c-4a8b-9c7a-2b8e0d9f1c3e';
+
+        let device, pulseCharacteristic, gpsCharacteristic;
+        let bpmHistory = [];
+        let bpmBuffer = []; // For smoothing heart rate
+
+        async function connectDevice() {
+            try {
+                device = await navigator.bluetooth.requestDevice({
+                    filters: [{ name: 'ConfidentCuff' }],
+                    optionalServices: [SERVICE_UUID]
+                });
+
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService(SERVICE_UUID);
+                pulseCharacteristic = await service.getCharacteristic(PULSE_CHARACTERISTIC_UUID);
+                gpsCharacteristic = await service.getCharacteristic(GPS_CHARACTERISTIC_UUID);
+
+                document.getElementById('deviceName').textContent = device.name;
+                document.getElementById('deviceId').textContent = device.id;
+                document.getElementById('connectButton').classList.add('hidden');
+
+                await pulseCharacteristic.startNotifications();
+                await gpsCharacteristic.startNotifications();
+
+                pulseCharacteristic.addEventListener('characteristicvaluechanged', handlePulseData);
+                gpsCharacteristic.addEventListener('characteristicvaluechanged', handleGPSData);
+
+                updateDateTime();
+            } catch (error) {
+                console.error('Connection failed:', error);
+                alert('Failed to connect to Confident Cuff');
+            }
+        }
+
+        function disconnectDevice() {
+            if (device && device.gatt.connected) {
+                device.gatt.disconnect();
+                document.getElementById('deviceName').textContent = 'N/A';
+                document.getElementById('deviceId').textContent = 'N/A';
+                document.getElementById('connectButton').classList.remove('hidden');
+                document.getElementById('heartRate').textContent = '0 BPM';
+                document.getElementById('latitude').textContent = 'Lat: N/A';
+                document.getElementById('longitude').textContent = 'Lon: N/A';
+                document.getElementById('mapLink').style.display = 'none';
+                bpmBuffer = [];
+                bpmHistory = [];
+            }
+        }
+
+        function handlePulseData(event) {
+            try {
+                const value = event.target.value;
+                const bpm = (value.getUint8(0) << 8) + value.getUint8(1);
+
+                // Validate BPM (based on Arduino constraints: 60-120 BPM)
+                if (bpm >= 60 && bpm <= 120) {
+                    // Add to buffer for smoothing (last 5 readings)
+                    bpmBuffer.push(bpm);
+                    if (bpmBuffer.length > 5) {
+                        bpmBuffer.shift();
+                    }
+
+                    // Calculate average BPM
+                    const avgBPM = Math.round(bpmBuffer.reduce((sum, val) => sum + val, 0) / bpmBuffer.length);
+                    document.getElementById('heartRate').textContent = `${avgBPM} BPM`;
+                    bpmHistory.push({ bpm: avgBPM, timestamp: new Date().toISOString() });
+                } else {
+                    console.warn(`Invalid BPM value: ${bpm}`);
+                }
+            } catch (error) {
+                console.error('Error processing pulse data:', error);
+            }
+        }
+
+        function handleGPSData(event) {
+            try {
+                const value = event.target.value;
+                const view = new DataView(value.buffer);
+                const lat = view.getFloat32(0, true);
+                const lon = view.getFloat32(4, true);
+
+                // Validate GPS coordinates
+                if (lat !== 0 && lon !== 0 && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+                    document.getElementById('latitude').textContent = `Lat: ${lat.toFixed(6)}`;
+                    document.getElementById('longitude').textContent = `Lon: ${lon.toFixed(6)}`;
+                    const mapLink = document.getElementById('mapLink');
+                    mapLink.href = `https://maps.google.com/?q=${lat},${lon}`;
+                    mapLink.style.display = 'block';
+                } else {
+                    document.getElementById('latitude').textContent = 'Lat: N/A';
+                    document.getElementById('longitude').textContent = 'Lon: N/A';
+                    document.getElementById('mapLink').style.display = 'none';
+                    console.warn('Invalid GPS coordinates');
+                }
+            } catch (error) {
+                console.error('Error processing GPS data:', error);
+            }
+        }
+
+        function calculateBPM() {
+            if (pulseCharacteristic && bpmBuffer.length > 0) {
+                // Display the latest smoothed BPM
+                document.getElementById('heartRate').textContent = document.getElementById('heartRate').textContent;
+            } else {
+                alert('Please connect to the device and wait for valid data');
+            }
+        }
+
+        function viewHistory() {
+            if (bpmHistory.length === 0) {
+                alert('No history available');
+                return;
+            }
+            const historyText = bpmHistory.map(entry => 
+                `Time: ${entry.timestamp}, BPM: ${entry.bpm}`
+            ).join('\n');
+            alert('Heart Rate History:\n' + historyText);
+        }
+
+        function sendSOS() {
+            if (!device || !device.gatt.connected) {
+                alert('Please connect to the device first');
+                return;
+            }
+            fetch('/trigger-sos', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('SOS alert sent to emergency contact');
+                    } else {
+                        alert('Failed to send SOS alert: ' + data.message);
+                    }
+                })
+                .catch(err => {
+                    alert('Error sending SOS alert: ' + err);
+                });
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('dateTime').textContent = now.toLocaleString();
+            setTimeout(updateDateTime, 1000);
+        }
+
+        document.getElementById('connectButton').onclick = connectDevice;
+    </script>
+</body>
+</html>

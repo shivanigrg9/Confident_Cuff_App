@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nearby Hospitals</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #16a085;
+        }
+        
+        .hospital-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .hospital-card {
+            background: white;
+            padding: 20px;
+            border-left: 6px solid #1abc9c;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        .hospital-card h3 {
+            margin: 0 0 10px;
+            color: #2c3e50;
+        }
+        
+        .hospital-card p {
+            margin: 5px 0;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🏥 Nearby Hospitals</h1>
+        <div id="hospitalContainer" class="hospital-container"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('hospitalContainer');
+
+            // Hardcoded hospital data
+            const hospitals = [{
+                name: "City General Hospital",
+                address: "123 Main Street, City Center",
+                phone: "+1 555-1234"
+            }, {
+                name: "Northside Medical Center",
+                address: "456 North Avenue, Uptown",
+                phone: "+1 555-5678"
+            }, {
+                name: "Southside Hospital",
+                address: "789 South Road, Downtown",
+                phone: "+1 555-9012"
+            }, {
+                name: "Eastside Clinic",
+                address: "101 East Lane, East District",
+                phone: "+1 555-3456"
+            }, {
+                name: "Westside Health Center",
+                address: "202 West Boulevard, West End",
+                phone: "+1 555-7890"
+            }];
+
+            // Display hospital data
+            hospitals.forEach(hospital => {
+                const card = document.createElement('div');
+                card.className = 'hospital-card';
+                card.innerHTML = `
+                    <h3>${hospital.name}</h3>
+                    <p>📍 ${hospital.address}</p>
+                    <p>📞 ${hospital.phone}</p>
+                `;
+                container.appendChild(card);
+            });
+        });
+    </script>
+</body>
+
+</html>

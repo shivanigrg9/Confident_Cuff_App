@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Settings</h1>
+        <form>
+            <label for="notification">Enable Notifications:</label>
+            <input type="checkbox" id="notification" name="notification">
+
+            <label for="dark-mode">Enable Dark Mode:</label>
+            <input type="checkbox" id="dark-mode" name="dark-mode">
+
+            <label for="language">Language:</label>
+            <select id="language" name="language">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <!-- Add more languages as needed -->
+            </select>
+
+            <button type="submit">Save</button>
+        </form>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        function logout() {
+            // Implement logout functionality here
+            alert('Logged out successfully!');
+            window.location.href = 'index.html'; // Redirect to login page
+        }
+    </script>
+</body>
+
+</html>

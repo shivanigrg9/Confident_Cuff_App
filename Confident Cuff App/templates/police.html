@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Police Stations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+        }
+        
+        #searchBar {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #aaa;
+            font-size: 16px;
+        }
+        
+        .scrollable-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        li {
+            background: #eef;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📍 Nearby Police Stations</h1>
+        <input type="text" id="searchBar" placeholder="🔍 Search stations..." />
+        <div class="scrollable-list">
+            <ul id="stationList"></ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const stationList = document.getElementById('stationList');
+            const searchBar = document.getElementById('searchBar');
+
+            // Hardcoded data for police stations
+            const allStations = [{
+                name: "Central Police Station",
+                address: "123 Main Street, City Center",
+                phone: "+1 555-1234"
+            }, {
+                name: "Northside Police Station",
+                address: "456 North Avenue, Uptown",
+                phone: "+1 555-5678"
+            }, {
+                name: "Southside Police Station",
+                address: "789 South Road, Downtown",
+                phone: "+1 555-9012"
+            }, {
+                name: "Eastside Police Station",
+                address: "101 East Lane, East District",
+                phone: "+1 555-3456"
+            }, {
+                name: "Westside Police Station",
+                address: "202 West Boulevard, West End",
+                phone: "+1 555-7890"
+            }];
+
+            // Display the first 5 stations on load
+            displayStations(allStations.slice(0, 5));
+
+            // Add search filter
+            searchBar.addEventListener('input', () => {
+                const searchTerm = searchBar.value.toLowerCase();
+                const filtered = allStations.filter(station =>
+                    station.name.toLowerCase().includes(searchTerm) ||
+                    station.address.toLowerCase().includes(searchTerm) ||
+                    station.phone.toLowerCase().includes(searchTerm)
+                );
+                displayStations(filtered.slice(0, 5)); // Show first 5 matching stations
+            });
+
+            function displayStations(stations) {
+                stationList.innerHTML = '';
+                if (stations.length === 0) {
+                    stationList.innerHTML = "<li>No matching stations found</li>";
+                    return;
+                }
+                stations.forEach(station => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <strong>${station.name}</strong><br/>
+                        📍 ${station.address}<br/>
+                        📞 ${station.phone}
+                    `;
+                    stationList.appendChild(li);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nearby Ambulance Services</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #e74c3c;
+        }
+        
+        .ambulance-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .ambulance-card {
+            background: white;
+            padding: 20px;
+            border-left: 6px solid #e74c3c;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        .ambulance-card h3 {
+            margin: 0 0 10px;
+            color: #2c3e50;
+        }
+        
+        .ambulance-card p {
+            margin: 5px 0;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚑 Nearby Ambulance Services</h1>
+        <div id="ambulanceContainer" class="ambulance-container"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('ambulanceContainer');
+
+            // Hardcoded ambulance data
+            const ambulances = [{
+                name: "City Ambulance Service",
+                address: "123 Emergency Lane, City Center",
+                phone: "+1 555-1234"
+            }, {
+                name: "Rapid Response Ambulance",
+                address: "456 Quick Avenue, Uptown",
+                phone: "+1 555-5678"
+            }, {
+                name: "24/7 Ambulance Service",
+                address: "789 Night Road, Downtown",
+                phone: "+1 555-9012"
+            }, {
+                name: "Eastside Ambulance",
+                address: "101 East Lane, East District",
+                phone: "+1 555-3456"
+            }, {
+                name: "Westside Ambulance",
+                address: "202 West Boulevard, West End",
+                phone: "+1 555-7890"
+            }];
+
+            // Display ambulance data
+            ambulances.forEach(ambulance => {
+                const card = document.createElement('div');
+                card.className = 'ambulance-card';
+                card.innerHTML = `
+                    <h3>${ambulance.name}</h3>
+                    <p>📍 ${ambulance.address}</p>
+                    <p>📞 ${ambulance.phone}</p>
+                `;
+                container.appendChild(card);
+            });
+        });
+    </script>
+</body>
+
+</html>
